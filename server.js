@@ -11,35 +11,21 @@ const app = express();
 app.engine('hbs', hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' }));
 app.set('view engine', '.hbs');
 
+app.use(session({ secret: 'anything' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.use(session({ secret: 'anything' }));
-app.use(passport.initialize());
-app.use(passport.session());
-
 app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['email', 'profile'] }));
-
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/user/no-permission'}), 
-  (req, res) => {
-    res.redirect('/user/logged');
-  }
-);
-
-app.get('/user/logged', (req, res) => {
-  res.render('logged');
-});
-
-app.get('/user/no-permission', (req, res) => {
-  res.render('noPermission');
-});
+app.use('/auth', require('./routes/auth.routes'));
+app.use('/user', require('./routes/user.routes'));
 
 app.use('/', (req, res) => {
   res.status(404).render('notFound');
