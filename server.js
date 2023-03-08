@@ -23,6 +23,13 @@ passport.deserializeUser((obj, deserialize) => {
   deserialize(null, obj);
 });
 
+app.use(session({ secret: 'anything' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['email', 'profile'] }));
+
 app.engine('hbs', hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' }));
 app.set('view engine', '.hbs');
 
@@ -30,10 +37,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '/public')));
-
-app.use(session({ secret: '12A90asj.12GJe8sd,,j129!/sdFa9-12ejasYYd/;g0' }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.get('/', (req, res) => {
   res.render('index');
